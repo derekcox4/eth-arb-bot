@@ -24,11 +24,16 @@ ARBITRUM_ROUTER=<router address on Arbitrum>
 WALLET_PRIVATE_KEY=<key used for signing transactions>
 FLASHBOTS_RELAY_URL=<flashbots relay url>
 OPPORTUNITY_THRESHOLD=<decimal spread threshold, e.g. 0.01 for 1%>
+REAL_EXECUTION=<true to send real txs>
 ```
 
 ### Arbitrage detection
 
-`runDEXStrategy` now fetches the expected output for the same token pair on
-Ethereum, Base and Arbitrum using the `getAmountsOut` call. If the difference
-between the highest and lowest output exceeds `OPPORTUNITY_THRESHOLD` after
-accounting for fees and gas, it will log an arbitrage opportunity.
+`runDEXStrategy` fetches prices for common token pairs across Ethereum, Base and
+Arbitrum. When the difference between the highest and lowest output exceeds
+`OPPORTUNITY_THRESHOLD` (after a gas/fee buffer) the bot logs an opportunity and
+will execute the swap if `REAL_EXECUTION=true`.
+
+The bot also checks Aave and Compound lending rates for profitable borrow/lend
+cycles and logs cross-layer price gaps (L1 vs L2) for potential bridging
+arbitrage.

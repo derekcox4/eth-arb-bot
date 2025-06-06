@@ -11,4 +11,5 @@ console.log("WALLET_PRIVATE_KEY loaded:", !!process.env.WALLET_PRIVATE_KEY);
 console.log("FLASHBOTS_RELAY_URL loaded:", !!process.env.FLASHBOTS_RELAY_URL);
 
 console.log("Multi-chain Arbitrage Bot Live...");
-setInterval(runArbitrageStrategies, 15000);
+console.log("REAL_EXECUTION:", process.env.REAL_EXECUTION === "true");
+setInterval(runArbitrageStrategies, 10000);
