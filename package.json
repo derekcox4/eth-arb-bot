@@ -6,7 +6,7 @@
   },
   "dependencies": {
     "ethers": "^5.7.2",
-    "@flashbots/ethers-provider-bundle": "1.0.0",
+    "@flashbots/ethers-provider-bundle": "^0.15.2",
     "dotenv": "^16.0.0"
   }
 }
