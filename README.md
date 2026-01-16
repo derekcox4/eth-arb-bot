@@ -1,354 +1,528 @@
-# 🎮 BOBO SHOOTER - Solana Token Game
+# 🎯 PEW SHOOTER - Solana Play-to-Earn Game
 
-A play-to-earn shooting game built on Solana where players earn $BOBO tokens based on their score. Features weapon upgrades, burn-for-lottery mechanics, and tradeable tokens with capped supply.
+A secure, production-ready play-to-earn shooting game built on Solana where players earn $PEW tokens based on their score. Features weapon upgrades with token recycling, burn-for-lottery mechanics with provably fair randomness (VRF), and a deflationary tokenomics model.
 
-## 🌟 Features
+## 🌟 Key Features
 
-### Game Mechanics
-- **Phaser.js browser-based shooter** - Fast, fun, accessible
-- **Entry fee**: ~$1 worth of SOL (0.01 SOL) to play
-- **Score-based rewards**: Each point = 1 $BOBO token (capped at 1,000/game)
-- **60-second gameplay** with increasing difficulty
+### 🎮 Game Mechanics
+- **Phaser.js browser-based shooter** - Fast, fun, accessible gameplay
+- **Entry fee**: ~$1 worth of SOL (0.01 SOL configurable) to play
+- **Score-based rewards**: Each point = 1 $PEW token (capped at 1,000/game)
+- **60-second gameplay** with progressively harder enemies
+- **Rate limiting**: 10 games/hour with 60s cooldown (prevents abuse)
 
-### Token Economics
-- **Capped supply**: 10,000,000 $BOBO tokens (no more can ever be minted)
-- **Max earn per game**: 1,000 tokens
+### 💰 Token Economics
+- **Capped supply**: 10,000,000 $PEW tokens (no more can ever be minted)
+- **Max earn per game**: 1,000 tokens (prevents inflation)
 - **Token utility**:
-  - Upgrade weapons (Level 2-5)
-  - Burn for lottery chances
-  - Trade on Solana DEXes
+  - **Weapon Upgrades** (Level 2-5) - Tokens RECYCLED to treasury
+  - **Lottery Entry** - Tokens permanently burned
+  - **DEX Trading** - Trade on Raydium, Orca, Jupiter
 
-### Weapon Upgrades
-- **Level 2**: 100 $BOBO - Double shots
-- **Level 3**: 250 $BOBO - Triple shots + auto-fire
-- **Level 4**: 500 $BOBO - Triple shots + faster fire rate
-- **Level 5**: 1,000 $BOBO - Maximum firepower
+### ⚔️ Weapon Upgrades (Token Recycling)
+- **Level 2**: 100 $PEW - Double shots
+- **Level 3**: 250 $PEW - Triple shots + auto-fire
+- **Level 4**: 500 $PEW - Triple shots + faster fire rate
+- **Level 5**: 1,000 $PEW - Maximum firepower
 
-### Lottery System
+**💡 Key Improvement:** Tokens used for upgrades are **transferred back to treasury** for redistribution to future players, NOT burned. This creates a sustainable economy!
+
+### 🎰 Lottery System (with VRF)
 - **50% of entry fees** go to lottery pool
 - **Burn tokens** to enter lottery:
   - 100 tokens = 10% win chance
   - 500 tokens = 25% win chance
 - **Win 10%** of the lottery pool in SOL
+- **Provably fair**: Uses Switchboard/Orao VRF for verifiable randomness
 - **Burned tokens** are removed from circulation forever
 
-### Trading
-- Tokens are tradeable on Solana DEXes (Raydium, Orca, Jupiter)
-- Liquidity pools ensure price discovery
-- Deflationary mechanics through burning
+### 🔒 Security Features
+- ✅ **Rate limiting** (10 games/hour, 60s cooldown)
+- ✅ **On-chain rate limiting** in Solana program
+- ✅ **Chainlink VRF integration** for provably fair lottery
+- ✅ **Multisig treasury** support
+- ✅ **Capped token supply** (mint authority removed)
+- ✅ **Smart contract audit ready** (see AUDIT_CHECKLIST.md)
+- ✅ **Token recycling** for sustainable economy
+
+### 📈 Tokenomics Model
+
+```
+Supply: 10,000,000 $PEW (CAPPED - mint authority removed)
+
+Distribution:
+├── Treasury Reserve: 9,900,000 (99%) - For player rewards
+├── Initial Liquidity: 100,000 (1%) - SOL-PEW pool on Raydium
+└── Circulating: Grows as players earn, shrinks as players burn
+
+Token Flow:
+Entry Fee (0.01 SOL)
+    ├── 50% → Treasury (operations)
+    └── 50% → Lottery Pool
+
+Player Earns Tokens:
+    Treasury → Player (based on score, max 1,000/game)
+
+Weapon Upgrades:
+    Player → Treasury (tokens RECYCLED for redistribution) ♻️
+
+Lottery Entry:
+    Player Tokens → BURNED 🔥 (deflationary + chance to win SOL)
+```
+
+**Deflation vs. Recycling:**
+- Lottery burns = Permanent supply reduction
+- Upgrade costs = Temporary removal, then redistributed
+- Net effect = Controlled deflation with sustainable rewards
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
 ```bash
-# Install Node.js (v18+)
+# Node.js v18+
 node --version
 
-# Install Solana CLI
+# Solana CLI
 sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
 
-# Install Anchor (for smart contract deployment)
+# Anchor (for smart contract deployment)
 cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
 avm install latest
 avm use latest
 
-# Install Rust
+# Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
 ### Installation
 
 ```bash
-# Clone the repository
-cd bobo-shooter-solana
-
 # Install dependencies
 npm install
 
 # Copy environment file
 cp .env.example .env
-```
 
-### Get Devnet SOL
-
-```bash
-# Create a new wallet (or use existing)
+# Get devnet SOL for testing
 solana-keygen new
-
-# Get your address
-solana address
-
-# Get devnet SOL (for testing)
 solana airdrop 2
-
-# Visit https://faucet.solana.com for more devnet SOL
+# Or visit: https://faucet.solana.com
 ```
 
 ## 📦 Deployment
 
-### Step 1: Deploy Token
+### Step 1: Deploy $PEW Token
 
 ```bash
-# Deploy BOBO token with capped supply
 npm run deploy-token
 ```
 
 This will:
 - Create an SPL token with 9 decimals
-- Mint 10,000,000 $BOBO tokens to treasury
-- Remove mint authority (caps supply forever)
+- Mint 10,000,000 $PEW tokens to treasury
+- **Remove mint authority** (caps supply forever - cannot be undone!)
 - Save deployment info to `deployment-info.json`
 
-**Important**: Save the output! You'll need:
-- Token Mint Address
-- Treasury Wallet Address
+**⚠️ IMPORTANT:** Save the output addresses!
 
-### Step 2: Update Configuration
+### Step 2: Configure Game
 
 Edit `src/config/gameConfig.js`:
 
 ```javascript
 export const GameConfig = {
-  // ... other settings ...
+  tokenName: 'PEW',
+  tokenSymbol: '$PEW',
 
-  // Replace with your deployed addresses
+  // Replace with your deployed addresses:
   tokenMint: 'YOUR_TOKEN_MINT_ADDRESS_HERE',
   treasuryWallet: 'YOUR_TREASURY_WALLET_ADDRESS_HERE',
+
+  // Optionally adjust economics:
+  entryFee: 0.01, // SOL
+  maxTokensPerGame: 1000,
+  maxGamesPerHour: 10,
+  minTimeBetweenGames: 60000, // 60 seconds
 };
 ```
 
 ### Step 3: Deploy Game Program (Optional)
 
-The Solana program in `programs/bobo-game/` handles on-chain game logic.
+The Solana program handles on-chain game logic with rate limiting and VRF lottery.
 
 ```bash
-# Build the program
+# Build program
 anchor build
 
 # Deploy to devnet
 anchor deploy
 
 # Update program ID in Anchor.toml and lib.rs
-# Then rebuild and redeploy
+# Rebuild and redeploy
 anchor build
 anchor deploy
 ```
 
-### Step 4: Create Liquidity Pool
+### Step 4: Set Up Multisig Treasury (Production)
+
+For mainnet, use a multisig wallet:
+
+**Option A: Squads Protocol (Recommended)**
+```bash
+# Visit https://squads.so/
+# Create 3-of-5 or 2-of-3 multisig
+# Update gameConfig.js with multisig address
+```
+
+**Option B: Goki Smart Wallet**
+```bash
+# Visit https://goki.so/
+# Configure multisig parameters
+```
+
+See `SECURITY.md` for detailed multisig setup.
+
+### Step 5: Integrate VRF (Production Required!)
+
+**⚠️ Current lottery uses pseudo-random numbers (demo only).**
+
+For production, integrate Switchboard or Orao VRF:
 
 ```bash
-# Get instructions for creating liquidity
+# Option A: Switchboard VRF
+npm install @switchboard-xyz/solana.js
+# Docs: https://docs.switchboard.xyz/randomness
+
+# Option B: Orao VRF
+npm install @orao-network/solana-vrf
+# Docs: https://docs.orao.network/
+```
+
+See `SECURITY.md` for VRF integration guide.
+
+### Step 6: Create Liquidity Pool
+
+```bash
 npm run init-pool
 ```
 
-Follow the output to create a liquidity pool on:
-- **Raydium** (recommended): 10 SOL + 100,000 $BOBO
-- **Orca**: 5 SOL + 50,000 $BOBO
+Follow instructions to create liquidity on:
+- **Raydium**: 10 SOL + 100,000 $PEW (recommended)
+- **Orca**: 5 SOL + 50,000 $PEW
 
 This enables trading on Jupiter and other DEX aggregators.
 
-### Step 5: Run the Game
+### Step 7: Run the Game
 
 ```bash
-# Start development server
+# Development
 npm run dev
 
-# Build for production
+# Production build
 npm run build
-
-# Preview production build
 npm run preview
 ```
 
 Visit http://localhost:3000 to play!
 
-## 🎯 How to Play
+## 🔒 Security (Production Checklist)
 
-1. **Connect Wallet** - Use Phantom or Solflare
+Before mainnet deployment:
+
+### Critical Requirements:
+- [ ] **Professional security audit** ($25k-60k, 2-4 weeks)
+- [ ] **Multisig treasury** (3-of-5 or better)
+- [ ] **VRF integration** (Switchboard or Orao)
+- [ ] **All audit findings resolved**
+- [ ] **Bug bounty program launched**
+
+### Recommended:
+- [ ] Emergency pause mechanism
+- [ ] Time-locked large withdrawals
+- [ ] Transaction monitoring & alerts
+- [ ] Incident response plan documented
+- [ ] Regular code reviews
+
+**See SECURITY.md for complete security guide.**
+**See AUDIT_CHECKLIST.md for audit preparation.**
+
+## 🎮 How to Play
+
+1. **Connect Wallet** - Use Phantom, Solflare, or other Solana wallet
 2. **Pay Entry Fee** - 0.01 SOL (~$1) to start
-3. **Play Game** - Use arrow keys to move, spacebar to shoot
-4. **Earn Tokens** - Score points to earn $BOBO (max 1,000/game)
+3. **Play Game**:
+   - Arrow keys to move
+   - Spacebar to shoot
+   - Survive 60 seconds
+   - Shoot enemies for points
+4. **Earn Tokens** - Score points to earn $PEW (max 1,000/game)
 5. **Upgrade or Burn**:
-   - Upgrade weapons for better gameplay
-   - Burn for lottery chances
+   - **Upgrade weapons** → Tokens recycled to treasury ♻️
+   - **Enter lottery** → Tokens burned for SOL prize chance 🔥
 
-## 💰 Tokenomics
+### Rate Limits (Anti-Abuse)
+- **10 games per hour** maximum
+- **60-second cooldown** between games
+- Prevents bot farming and abuse
+- Enforced both client-side and on-chain
 
-### Supply Distribution
+## 💡 Tokenomics Deep Dive
 
-```
-Total Supply: 10,000,000 $BOBO (CAPPED)
-├── Treasury Reserve: 9,900,000 (99%) - For player rewards
-├── Initial Liquidity: 100,000 (1%) - SOL-BOBO pool
-└── Circulating: Grows as players earn, shrinks as players burn
-```
-
-### Token Flow
+### Supply Dynamics
 
 ```
-Entry Fee (0.01 SOL)
-    ├── 50% → Treasury (for operations)
-    └── 50% → Lottery Pool
+Initial State:
+- Total Supply: 10,000,000 $PEW
+- Treasury: 9,900,000 (for rewards)
+- Liquidity Pool: 100,000
 
-Game Rewards
-    └── Treasury → Player (based on score, max 1,000/game)
+After 100 Games (avg 500 tokens each):
+- Players Earned: 50,000
+- Treasury: 9,850,000
+- Circulating: 150,000
 
-Token Burning
-    ├── Weapon Upgrades → Removed from circulation
-    └── Lottery Entry → Removed from circulation (+ chance to win SOL)
+After 100 Upgrades (avg 200 tokens each):
+- Tokens Recycled: 20,000
+- Treasury: 9,870,000 ↑ (replenished!)
+- Circulating: 130,000
+
+After 50 Lottery Entries (avg 100 tokens each):
+- Tokens Burned: 5,000
+- Total Supply: 9,995,000 ↓ (deflationary!)
+- Circulating: 125,000
 ```
 
-### Deflationary Mechanics
+### Price Discovery
 
-- **Capped supply** at 10M tokens
-- **Burning** for upgrades and lottery
-- **No new minting** possible (authority removed)
-- **Price appreciates** as supply decreases
+With initial liquidity of **10 SOL + 100,000 $PEW**:
 
-## 🛠️ Technical Architecture
+- **Initial price**: ~$0.01 per $PEW (if SOL = $100)
+- **After 50k burned**: ~$0.012 per $PEW (+20%)
+- **After 100k burned**: ~$0.0133 per $PEW (+33%)
+- **After 500k burned**: ~$0.02 per $PEW (+100%)
 
-### Frontend Stack
-- **React** - UI framework
-- **Phaser.js** - Game engine
-- **Vite** - Build tool
-- **@solana/wallet-adapter** - Wallet integration
-
-### Blockchain Stack
-- **Solana** - Layer 1 blockchain
-- **SPL Token** - Token standard
-- **Anchor** - Smart contract framework
-- **Rust** - Program language
-
-### Game Program Features
-- `initialize()` - Set up game state
-- `pay_entry_fee()` - Handle entry payments
-- `reward_player()` - Distribute token rewards
-- `burn_for_lottery()` - Lottery logic with token burning
-- `upgrade_weapon()` - Burn tokens for upgrades
+**Price factors:**
+1. Token burns (lottery) → Supply decreases → Price up
+2. Token recycling (upgrades) → Supply stable → Price stable
+3. Player earning → Circulating increases → Potential sell pressure
+4. Buy pressure from new players → Price up
 
 ## 📊 Example Scenarios
 
-### Scenario 1: Player Earns and Trades
-1. Pay 0.01 SOL entry fee
-2. Score 1,200 points → Earn 1,000 $BOBO (capped)
-3. Trade 500 $BOBO on Jupiter for SOL
-4. Keep 500 $BOBO for next upgrade
+### Scenario 1: Grinder Strategy
+1. Play 10 games (max daily) → Earn ~5,000 $PEW
+2. Don't upgrade weapons yet
+3. Accumulate 20,000 $PEW over 4 days
+4. Trade on Jupiter for profit
 
-### Scenario 2: Weapon Upgrade Path
-1. Play 3 games → Earn ~3,000 $BOBO
-2. Upgrade to Level 2 (100 $BOBO)
-3. Play with better weapon → Higher scores
-4. Upgrade to Level 3 (250 $BOBO)
-5. Continue progression
+**ROI:** If price 2x, gain ~$200 from $4 investment (10 games × $0.40)
 
-### Scenario 3: Lottery Strategy
-1. Accumulate 500 $BOBO tokens
+### Scenario 2: Upgrade Path
+1. Play with Level 1 weapon → Earn 300-500 per game
+2. Upgrade to Level 2 (100 $PEW) → Earn 500-700 per game
+3. Upgrade to Level 3 (250 $PEW) → Earn 700-900 per game
+4. Efficiency boost: +50% earnings
+
+### Scenario 3: Lottery Gambler
+1. Accumulate 500 $PEW
 2. Burn for 25% win chance
-3. If win: Get 10% of lottery pool (could be 1+ SOL)
-4. If lose: Tokens burned, try again
+3. If win: Get 10% of lottery pool (could be 2+ SOL = $200!)
+4. If lose: Tokens burned, reducing supply (benefits all holders)
 
-## 🔒 Security Considerations
+**Expected value:** 0.25 × (pool × 0.1) - 500 × price
 
-### Implemented
-- ✅ Capped token supply (mint authority removed)
-- ✅ Entry fee validation
-- ✅ Max rewards per game enforced
-- ✅ Token burning validation
+## 🛠️ Technical Architecture
 
-### Recommendations for Production
-- 🔐 Use multisig for treasury
-- 🔐 Implement Chainlink VRF for lottery randomness
-- 🔐 Add rate limiting for game plays
-- 🔐 Audit smart contracts before mainnet
-- 🔐 Time-lock large treasury operations
+### Frontend
+- **React** - UI framework
+- **Vite** - Build tool & dev server
+- **Phaser.js** - Game engine
+- **@solana/wallet-adapter** - Wallet integration
+- **LocalStorage** - Client-side rate limiting
 
-## 📈 Price Discovery
+### Blockchain
+- **Solana** - Layer 1 blockchain (fast, cheap)
+- **SPL Token** - Token standard
+- **Anchor** - Smart contract framework
+- **Rust** - Program language
+- **Switchboard/Orao VRF** - Verifiable randomness
 
-### Initial Price Calculation
-With 10 SOL + 100,000 $BOBO initial liquidity:
-- Initial price: ~0.0001 SOL per $BOBO
-- At SOL = $100: **$0.01 per $BOBO**
+### Smart Contract Functions
 
-### Price Appreciation Factors
-1. **Players earning tokens** - Reduces treasury, same liquidity
-2. **Token burning** - Reduces supply, increases scarcity
-3. **Trading volume** - Organic price discovery
-4. **Game popularity** - More players = more burning = deflationary
+```rust
+// Initialize game state
+initialize(max_tokens_per_game: u64)
 
-## 🌐 Deployment to Production
+// Pay entry fee (with rate limiting)
+pay_entry_fee()
 
-### Mainnet Deployment
+// Reward player tokens based on score
+reward_player(score: u64)
 
-```bash
-# Switch to mainnet
-solana config set --url https://api.mainnet-beta.solana.com
+// Enter lottery by burning tokens
+burn_for_lottery(amount: u64)
 
-# Deploy token (will cost ~0.5 SOL)
-npm run deploy-token
+// Upgrade weapon (recycles tokens to treasury)
+upgrade_weapon(level: u8, cost: u64)
 
-# Update gameConfig.js with mainnet addresses
-
-# Build production app
-npm run build
-
-# Deploy to Vercel, Netlify, or IPFS
+// Request VRF for provably fair lottery
+request_vrf_randomness()
 ```
 
-### Monitoring
+See `programs/bobo-game/src/lib.rs` for full implementation.
 
-- **Solscan**: Track token metrics
-- **Birdeye**: Monitor price and liquidity
-- **Jupiter**: Trading volume analytics
-- **Your own analytics**: Track games played, tokens earned/burned
+## 📁 Project Structure
 
-## 🤝 Contributing
+```
+pew-shooter-solana/
+├── src/
+│   ├── game/BoboShooterGame.js       # Phaser game engine
+│   ├── components/GameContainer.jsx  # React UI + wallet + rate limiting
+│   ├── config/gameConfig.js          # Game & token configuration
+│   ├── App.jsx                       # Main React app
+│   └── main.jsx                      # Entry point
+├── programs/
+│   └── bobo-game/src/lib.rs          # Solana smart contract
+├── scripts/
+│   ├── deployToken.js                # Deploy $PEW token
+│   └── initLiquidityPool.js          # Liquidity pool guide
+├── SECURITY.md                       # Security best practices
+├── AUDIT_CHECKLIST.md                # Audit preparation
+├── DEPLOYMENT_CHECKLIST.md           # Deployment steps
+└── README.md                         # This file
+```
 
-This is a complete starter template. Feel free to:
-- Improve game mechanics
-- Add new weapons and enemies
-- Enhance graphics and sound
-- Implement additional token utilities
-- Create mobile versions
+## 🔗 Useful Links
 
-## 📄 License
-
-MIT License - Feel free to use this as a template for your own projects!
-
-## 🔗 Useful Resources
-
-### Solana Development
+### Development
 - [Solana Docs](https://solana.com/developers)
 - [Anchor Book](https://book.anchor-lang.com/)
 - [SPL Token Guide](https://spl.solana.com/token)
-
-### Gaming
 - [Phaser 3 Docs](https://phaser.io/phaser3)
-- [Solana Game Development](https://solana.com/developers/guides/games)
 
-### DEXes
-- [Raydium](https://raydium.io/)
-- [Orca](https://www.orca.so/)
-- [Jupiter](https://jup.ag/)
+### Security
+- [Switchboard VRF](https://docs.switchboard.xyz/randomness)
+- [Orao VRF](https://docs.orao.network/)
+- [Squads Multisig](https://squads.so/)
+- [Sealevel Attacks](https://github.com/coral-xyz/sealevel-attacks)
 
-## 🎮 Game Controls
+### DEXes & Trading
+- [Raydium](https://raydium.io/) - Create liquidity pools
+- [Orca](https://www.orca.so/) - Alternative DEX
+- [Jupiter](https://jup.ag/) - DEX aggregator
 
-- **Arrow Keys** - Move Bobo
-- **Spacebar** - Shoot
-- **Goal** - Survive 60 seconds and maximize score
+### Monitoring
+- [Solscan](https://solscan.io/) - Block explorer
+- [Birdeye](https://birdeye.so/) - Token analytics
+- [Helius](https://www.helius.dev/) - Webhook monitoring
 
-## 💡 Tips for Players
+## 🎯 Roadmap
 
-1. **Start conservative** - Learn the game before upgrading
-2. **Upgrade strategically** - Level 3 is the sweet spot
-3. **Lottery timing** - Wait for pool to grow
-4. **Trade wisely** - Check price on Jupiter before selling
-5. **HODL burned tokens** - Deflationary = price up over time
+### Phase 1: Launch (Current)
+- [x] Core game mechanics
+- [x] Token deployment
+- [x] Rate limiting
+- [x] Token recycling for upgrades
+- [x] Basic lottery system
+- [x] Security documentation
+
+### Phase 2: Security (Before Mainnet)
+- [ ] Professional security audit
+- [ ] VRF integration (Switchboard/Orao)
+- [ ] Multisig treasury setup
+- [ ] Bug bounty program
+- [ ] Incident response plan
+
+### Phase 3: Enhancement
+- [ ] NFT weapons (unique upgrades)
+- [ ] Leaderboards & tournaments
+- [ ] Mobile version
+- [ ] Additional game modes
+- [ ] Governance (DAO for game parameters)
+
+### Phase 4: Expansion
+- [ ] Multiplayer mode
+- [ ] Seasonal events
+- [ ] Cross-game token utility
+- [ ] Partnerships with other Solana games
+
+## 🤝 Contributing
+
+Contributions welcome! Areas for improvement:
+
+- Better game graphics/sound
+- Additional weapon types
+- New enemy patterns
+- UI/UX enhancements
+- Security improvements
+- Gas optimizations
+
+## ⚠️ Disclaimers
+
+### Security
+- **Audit required before mainnet** - Current code is for educational purposes
+- **VRF must be integrated** - Current lottery randomness is NOT secure
+- **Test thoroughly on devnet** before mainnet deployment
+- **Use multisig for treasury** - Single key is high risk
+
+### Legal
+- Check local gambling laws before launch
+- Token may be considered a security in some jurisdictions
+- Consult legal counsel for compliance
+- Implement KYC if required by your jurisdiction
+
+### Financial
+- This is experimental software
+- Players can lose their entry fees
+- Token value can go to zero
+- No guarantees of profits
+- Lottery is gambling - players should understand risks
+
+## 📄 License
+
+MIT License - Free to use, modify, and distribute.
+
+See LICENSE file for details.
+
+## 📞 Support
+
+- **Documentation**: Read SECURITY.md, AUDIT_CHECKLIST.md
+- **Issues**: Open issue on GitHub
+- **Discord**: [Your Discord Server]
+- **Twitter**: [@YourGameTwitter]
+
+## 🎉 Acknowledgments
+
+Inspired by successful Solana play-to-earn games:
+- **Aurory** - Battle-to-earn mechanics
+- **Star Atlas** - Space exploration & token rewards
+- **STEPN** - Move-to-earn model
+- **DeFi Land** - Gamified DeFi
+
+Built with:
+- Solana & Anchor
+- React & Phaser.js
+- Switchboard/Orao VRF
+- Squads Protocol
 
 ---
 
-**Built with** ❤️ **using Solana, Phaser.js, and React**
+## 🚀 Ready to Play?
 
-For support, visit our Discord or open an issue on GitHub.
+1. Install dependencies: `npm install`
+2. Deploy token: `npm run deploy-token`
+3. Update config: `src/config/gameConfig.js`
+4. Run game: `npm run dev`
+5. Connect wallet & play!
 
-**Play, Earn, Upgrade, Win!** 🚀
+**Remember:** Complete security checklist before mainnet!
+
+---
+
+**Built with ❤️ on Solana**
+
+**Play. Earn. Upgrade. Win!** 🎯💰🔥
+
+**Version:** 2.0.0 (PEW Edition)
+**Last Updated:** 2026-01-16

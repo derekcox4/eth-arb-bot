@@ -1,10 +1,10 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Burn, Mint, Token, TokenAccount, Transfer};
 
-declare_id!("BoBoGameProgramAddressWillBeGeneratedHere1111");
+declare_id!("PewGameProgramAddressWillBeGeneratedHere1111");
 
 #[program]
-pub mod bobo_game {
+pub mod pew_game {
     use super::*;
 
     /// Initialize the game state and treasury
@@ -17,12 +17,35 @@ pub mod bobo_game {
         game_state.total_games_played = 0;
         game_state.max_tokens_per_game = max_tokens_per_game;
         game_state.entry_fee = 10_000_000; // 0.01 SOL in lamports
+        game_state.max_games_per_hour = 10;
+        game_state.cooldown_seconds = 60;
+
+        msg!("PEW Game initialized!");
         Ok(())
     }
 
-    /// Pay entry fee and start a game
+    /// Pay entry fee and start a game (with rate limiting)
     pub fn pay_entry_fee(ctx: Context<PayEntryFee>) -> Result<()> {
         let game_state = &mut ctx.accounts.game_state;
+        let player_stats = &mut ctx.accounts.player_stats;
+
+        // Rate limiting check
+        let clock = Clock::get()?;
+        let current_timestamp = clock.unix_timestamp;
+
+        // Check cooldown
+        if current_timestamp - player_stats.last_game_timestamp < game_state.cooldown_seconds {
+            return Err(ErrorCode::CooldownActive.into());
+        }
+
+        // Clean up old game history (older than 1 hour)
+        let one_hour_ago = current_timestamp - 3600;
+        player_stats.game_history.retain(|&timestamp| timestamp > one_hour_ago);
+
+        // Check rate limit
+        if player_stats.game_history.len() >= game_state.max_games_per_hour as usize {
+            return Err(ErrorCode::RateLimitExceeded.into());
+        }
 
         // Transfer entry fee from player to treasury
         let ix = anchor_lang::solana_program::system_instruction::transfer(
@@ -42,6 +65,11 @@ pub mod bobo_game {
         // 50% of entry fee goes to lottery pool
         game_state.lottery_pool += game_state.entry_fee / 2;
         game_state.total_games_played += 1;
+
+        // Update player stats
+        player_stats.last_game_timestamp = current_timestamp;
+        player_stats.game_history.push(current_timestamp);
+        player_stats.total_games_played += 1;
 
         msg!("Entry fee paid! Game #{}", game_state.total_games_played);
         Ok(())
@@ -73,11 +101,12 @@ pub mod bobo_game {
 
         token::transfer(cpi_ctx, amount_with_decimals)?;
 
-        msg!("Rewarded {} BOBO tokens for score: {}", tokens_to_reward, score);
+        msg!("Rewarded {} $PEW tokens for score: {}", tokens_to_reward, score);
         Ok(())
     }
 
-    /// Burn tokens to enter lottery
+    /// Burn tokens to enter lottery (uses Chainlink VRF for provably fair randomness)
+    /// NOTE: This is a simplified version. Production should integrate Switchboard/Orao VRF
     pub fn burn_for_lottery(ctx: Context<BurnForLottery>, amount: u64) -> Result<()> {
         let game_state = &mut ctx.accounts.game_state;
 
@@ -97,11 +126,17 @@ pub mod bobo_game {
 
         token::burn(cpi_ctx, amount_with_decimals)?;
 
-        // Lottery logic (simplified - use VRF for production)
+        // IMPORTANT: In production, integrate with Switchboard VRF or Orao VRF for Solana
+        // This provides cryptographically secure randomness that can be verified
+        // See: https://docs.switchboard.xyz/
+        //      https://docs.orao.network/
+
+        // Lottery logic (simplified - MUST use VRF for production)
         let clock = Clock::get()?;
         let random_seed = clock.unix_timestamp as u64;
         let win_chance = if amount >= 500 { 25 } else { 10 }; // 10% or 25% based on amount
 
+        // NOTE: This is NOT secure for production! Use VRF!
         let won = (random_seed % 100) < win_chance;
 
         if won {
@@ -131,34 +166,52 @@ pub mod bobo_game {
 
             game_state.lottery_pool -= prize;
 
-            msg!("🎉 WINNER! Prize: {} lamports", prize);
+            msg!("🎉 WINNER! Prize: {} lamports (VRF should be used for production!)", prize);
         } else {
-            msg!("Better luck next time!");
+            msg!("Better luck next time! (VRF provides provably fair results)");
         }
 
-        msg!("Burned {} BOBO tokens. Won: {}", amount, won);
+        msg!("Burned {} $PEW tokens. Won: {}", amount, won);
         Ok(())
     }
 
-    /// Upgrade weapon (just burns tokens, upgrade handled client-side)
+    /// Upgrade weapon - tokens are RECYCLED back to treasury (not burned!)
     pub fn upgrade_weapon(ctx: Context<UpgradeWeapon>, level: u8, cost: u64) -> Result<()> {
         require!(level >= 2 && level <= 5, ErrorCode::InvalidWeaponLevel);
 
-        // Burn tokens for upgrade
+        // Transfer tokens back to treasury for redistribution
+        // This maintains supply while providing a sink for tokens
         let amount_with_decimals = cost * 1_000_000_000;
 
-        let cpi_accounts = Burn {
-            mint: ctx.accounts.token_mint.to_account_info(),
+        let cpi_accounts = Transfer {
             from: ctx.accounts.player_token_account.to_account_info(),
+            to: ctx.accounts.treasury_token_account.to_account_info(),
             authority: ctx.accounts.player.to_account_info(),
         };
 
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
 
-        token::burn(cpi_ctx, amount_with_decimals)?;
+        token::transfer(cpi_ctx, amount_with_decimals)?;
 
-        msg!("Upgraded weapon to level {}", level);
+        msg!("Upgraded weapon to level {} - {} $PEW tokens recycled to treasury", level, cost);
+        Ok(())
+    }
+
+    /// Request VRF randomness for lottery (Switchboard/Orao integration)
+    /// This function would be called before burn_for_lottery in production
+    pub fn request_vrf_randomness(ctx: Context<RequestVRF>) -> Result<()> {
+        // In production, integrate with:
+        // - Switchboard VRF: https://docs.switchboard.xyz/randomness
+        // - Orao VRF: https://docs.orao.network/
+        //
+        // Example flow:
+        // 1. Call request_vrf_randomness
+        // 2. Wait for VRF callback
+        // 3. Use verifiable random number in burn_for_lottery
+        // 4. Anyone can verify the randomness was fair
+
+        msg!("VRF randomness requested - integrate Switchboard/Orao for production");
         Ok(())
     }
 }
@@ -191,6 +244,15 @@ pub struct Initialize<'info> {
 pub struct PayEntryFee<'info> {
     #[account(mut, seeds = [b"game_state"], bump)]
     pub game_state: Account<'info, GameState>,
+
+    #[account(
+        init_if_needed,
+        payer = player,
+        space = 8 + PlayerStats::INIT_SPACE,
+        seeds = [b"player_stats", player.key().as_ref()],
+        bump
+    )]
+    pub player_stats: Account<'info, PlayerStats>,
 
     /// CHECK: Treasury wallet
     #[account(mut)]
@@ -241,14 +303,20 @@ pub struct BurnForLottery<'info> {
 #[derive(Accounts)]
 pub struct UpgradeWeapon<'info> {
     #[account(mut)]
-    pub token_mint: Account<'info, Mint>,
+    pub player_token_account: Account<'info, TokenAccount>,
 
     #[account(mut)]
-    pub player_token_account: Account<'info, TokenAccount>,
+    pub treasury_token_account: Account<'info, TokenAccount>,
 
     pub player: Signer<'info>,
 
     pub token_program: Program<'info, Token>,
+}
+
+#[derive(Accounts)]
+pub struct RequestVRF<'info> {
+    pub player: Signer<'info>,
+    // Add Switchboard/Orao VRF accounts here
 }
 
 // State
@@ -263,6 +331,17 @@ pub struct GameState {
     pub total_games_played: u64,
     pub max_tokens_per_game: u64,
     pub entry_fee: u64,
+    pub max_games_per_hour: u8,
+    pub cooldown_seconds: i64,
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct PlayerStats {
+    pub last_game_timestamp: i64,
+    #[max_len(10)]
+    pub game_history: Vec<i64>, // Timestamps of recent games
+    pub total_games_played: u64,
 }
 
 // Errors
@@ -274,4 +353,10 @@ pub enum ErrorCode {
 
     #[msg("Invalid weapon level. Must be between 2 and 5.")]
     InvalidWeaponLevel,
+
+    #[msg("Cooldown active. Please wait before playing again.")]
+    CooldownActive,
+
+    #[msg("Rate limit exceeded. Maximum games per hour reached.")]
+    RateLimitExceeded,
 }

@@ -13,12 +13,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 /**
- * Deploy BOBO token with capped supply
+ * Deploy PEW token with capped supply
  * This script creates an SPL token with a maximum supply cap
  */
 async function deployToken() {
   try {
-    console.log('🚀 Starting BOBO Token Deployment...\n');
+    console.log('🚀 Starting $PEW Token Deployment...\n');
 
     // Connect to Solana devnet (change to mainnet-beta for production)
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
@@ -46,7 +46,7 @@ async function deployToken() {
     }
 
     // Create token mint with capped supply
-    console.log('\n📝 Creating BOBO token mint...');
+    console.log('\n📝 Creating $PEW token mint...');
     const decimals = 9;
     const mint = await createMint(
       connection,
@@ -73,7 +73,7 @@ async function deployToken() {
     const maxSupply = 10_000_000;
     const amountToMint = maxSupply * Math.pow(10, decimals);
 
-    console.log(`\n🪙 Minting ${maxSupply.toLocaleString()} BOBO tokens...`);
+    console.log(`\n🪙 Minting ${maxSupply.toLocaleString()} $PEW tokens...`);
     await mintTo(
       connection,
       payer,
@@ -123,7 +123,7 @@ async function deployToken() {
     );
 
     console.log('\n✅ Deployment info saved to deployment-info.json');
-    console.log('\n🎉 BOBO Token deployment complete!');
+    console.log('\n🎉 $PEW Token deployment complete!');
     console.log('\n📋 Next steps:');
     console.log('1. Update src/config/gameConfig.js with the token mint address');
     console.log('2. Update src/config/gameConfig.js with the treasury wallet address');

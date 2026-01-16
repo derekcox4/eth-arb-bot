@@ -1,7 +1,7 @@
 {
-  "name": "bobo-shooter-solana",
-  "version": "1.0.0",
-  "description": "Bobo shooting game with Solana token rewards and lottery system",
+  "name": "pew-shooter-solana",
+  "version": "2.0.0",
+  "description": "PEW Shooter - Solana play-to-earn game with $PEW token rewards, weapon upgrades, and lottery system",
   "type": "module",
   "main": "src/index.js",
   "scripts": {
