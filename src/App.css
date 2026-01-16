@@ -1,0 +1,175 @@
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.game-container {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  max-width: 900px;
+  width: 100%;
+}
+
+.game-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.game-header h1 {
+  font-size: 3em;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.game-header p {
+  font-size: 1.2em;
+  opacity: 0.9;
+}
+
+.wallet-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.balance-display {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 1.1em;
+}
+
+.game-canvas-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.game-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.stat-card h3 {
+  font-size: 0.9em;
+  opacity: 0.8;
+  margin-bottom: 8px;
+}
+
+.stat-card p {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+.upgrade-section {
+  margin-top: 30px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.upgrade-section h2 {
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.upgrade-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.upgrade-btn, .lottery-btn, .play-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upgrade-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.lottery-btn {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.play-btn {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  font-size: 1.3em;
+  padding: 15px 40px;
+}
+
+.upgrade-btn:hover, .lottery-btn:hover, .play-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.upgrade-btn:disabled, .lottery-btn:disabled, .play-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.lottery-pool {
+  text-align: center;
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(245, 87, 108, 0.2);
+  border-radius: 10px;
+  border: 2px solid rgba(245, 87, 108, 0.5);
+}
+
+.lottery-pool h3 {
+  font-size: 1.2em;
+  margin-bottom: 10px;
+}
+
+.lottery-pool .prize {
+  font-size: 2em;
+  font-weight: bold;
+  color: #f5576c;
+}
+
+.game-info {
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  font-size: 0.9em;
+  line-height: 1.6;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2em;
+}
