@@ -5,8 +5,10 @@ import { PublicKey, LAMPORTS_PER_SOL, Transaction, SystemProgram } from '@solana
 import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import BoboShooterGame from '../game/BoboShooterGame';
 import Leaderboard from './Leaderboard';
+import HistoricalStats from './HistoricalStats';
+import SocialShare from './SocialShare';
 import { GameConfig } from '../config/gameConfig';
-import { updateLeaderboard, getPlayerRank } from '../utils/leaderboard';
+import { updateLeaderboard, getPlayerRank, shouldResetLeaderboard, archiveLeaderboard } from '../utils/leaderboard';
 
 const GameContainer = () => {
   const { connection } = useConnection();
@@ -22,6 +24,8 @@ const GameContainer = () => {
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [gamesPlayedThisHour, setGamesPlayedThisHour] = useState(0);
   const [playerRank, setPlayerRank] = useState(null);
+  const [showSocialShare, setShowSocialShare] = useState(false);
+  const [lastScore, setLastScore] = useState(0);
   const gameContainerRef = useRef(null);
 
   // Token mint address (will be set after deployment)
@@ -93,6 +97,24 @@ const GameContainer = () => {
 
     return () => clearInterval(interval);
   }, [publicKey]);
+
+  // Archive leaderboard daily at midnight UTC
+  useEffect(() => {
+    const checkForReset = () => {
+      if (shouldResetLeaderboard()) {
+        archiveLeaderboard();
+        console.log('Leaderboard archived for new day');
+      }
+    };
+
+    // Check immediately
+    checkForReset();
+
+    // Check every minute for midnight UTC
+    const interval = setInterval(checkForReset, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Fetch balances
   useEffect(() => {
@@ -191,6 +213,7 @@ const GameContainer = () => {
 
   const handleGameEnd = async (finalScore) => {
     setScore(finalScore);
+    setLastScore(finalScore);
     setIsPlaying(false);
 
     if (!publicKey) return;
@@ -211,6 +234,8 @@ const GameContainer = () => {
     if (newRank && newRank <= GameConfig.leaderboardSize) {
       message += `🏆 You're ranked #${newRank} on the daily leaderboard!\n`;
       message += `Keep playing to secure your spot in the top 10!`;
+      // Show social share for top 10
+      setShowSocialShare(true);
     } else if (newRank) {
       message += `Current rank: #${newRank}\n`;
       message += `You need to reach top 10 to win daily prizes!`;
@@ -340,6 +365,14 @@ const GameContainer = () => {
 
           {/* Daily Leaderboard */}
           <Leaderboard dailyPot={dailyPot} />
+
+          {/* Social Sharing (shown after top 10 finish) */}
+          {showSocialShare && playerRank && playerRank <= GameConfig.leaderboardSize && (
+            <SocialShare rank={playerRank} score={lastScore} dailyPot={dailyPot} />
+          )}
+
+          {/* Historical Stats */}
+          <HistoricalStats />
 
           <div className="game-info">
             <strong>How to Play:</strong>

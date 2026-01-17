@@ -379,3 +379,197 @@
     font-size: 1.4em;
   }
 }
+
+/* Historical Stats Styles */
+.historical-stats-container {
+  margin-top: 30px;
+  padding: 25px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  border: 2px solid rgba(100, 200, 255, 0.3);
+}
+
+.historical-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.historical-header h2 {
+  font-size: 1.8em;
+  margin: 0;
+}
+
+.player-stats-summary {
+  background: rgba(76, 175, 80, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 25px;
+  border: 2px solid rgba(76, 175, 80, 0.3);
+}
+
+.player-stats-summary h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.3em;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.stat-box {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 2em;
+  font-weight: bold;
+  color: #4facfe;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.date-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.date-selector label {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+.date-dropdown {
+  padding: 10px 20px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.date-dropdown:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.date-dropdown option {
+  background: #1a1a2e;
+  color: white;
+}
+
+.historical-leaderboard {
+  margin-top: 20px;
+}
+
+.historical-leaderboard h3 {
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+}
+
+.empty-historical {
+  text-align: center;
+  padding: 60px 20px;
+  opacity: 0.7;
+}
+
+.empty-historical p {
+  font-size: 1.1em;
+  margin: 10px 0;
+}
+
+/* Social Sharing Styles */
+.social-sharing {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.share-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.share-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.share-btn-twitter {
+  background: linear-gradient(135deg, #1DA1F2 0%, #0d8bd9 100%);
+  color: white;
+}
+
+.share-btn-discord {
+  background: linear-gradient(135deg, #5865F2 0%, #4752c4 100%);
+  color: white;
+}
+
+.share-btn-copy {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.share-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.share-btn:active {
+  transform: translateY(0);
+}
+
+.share-notification {
+  margin-top: 10px;
+  padding: 10px 15px;
+  background: rgba(76, 175, 80, 0.2);
+  border-radius: 8px;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  font-size: 0.9em;
+  display: inline-block;
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+
+  .stat-value {
+    font-size: 1.5em;
+  }
+
+  .date-selector {
+    flex-direction: column;
+  }
+
+  .date-dropdown {
+    width: 100%;
+    max-width: 300px;
+  }
+}

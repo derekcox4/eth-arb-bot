@@ -1,6 +1,6 @@
 # 🎯 PEW SHOOTER - Solana Play-to-Earn Game
 
-A secure, production-ready play-to-earn shooting game built on Solana where players earn $PEW tokens based on their score. Features weapon upgrades with token recycling, burn-for-lottery mechanics with provably fair randomness (VRF), and a deflationary tokenomics model.
+A secure, production-ready play-to-earn shooting game built on Solana where players earn $PEW tokens and compete for SOL prizes. Features daily leaderboards, weapon upgrades with token recycling, NFT trophies for winners, and transparent developer revenue tracking.
 
 ## 🌟 Key Features
 
@@ -15,35 +15,47 @@ A secure, production-ready play-to-earn shooting game built on Solana where play
 - **Capped supply**: 10,000,000 $PEW tokens (no more can ever be minted)
 - **Max earn per game**: 1,000 tokens (prevents inflation)
 - **Token utility**:
-  - **Weapon Upgrades** (Level 2-5) - Tokens RECYCLED to treasury
-  - **Lottery Entry** - Tokens permanently burned
+  - **Weapon Upgrades** (Level 2-4) - Tokens RECYCLED to treasury
   - **DEX Trading** - Trade on Raydium, Orca, Jupiter
 
 ### ⚔️ Weapon Upgrades (Token Recycling)
 - **Level 2**: 100 $PEW - Double shots
 - **Level 3**: 250 $PEW - Triple shots + auto-fire
 - **Level 4**: 500 $PEW - Triple shots + faster fire rate
-- **Level 5**: 1,000 $PEW - Maximum firepower
 
-**💡 Key Improvement:** Tokens used for upgrades are **transferred back to treasury** for redistribution to future players, NOT burned. This creates a sustainable economy!
+**💡 Key Feature:** Tokens used for upgrades are **transferred back to treasury** for redistribution to future players, NOT burned. This creates a sustainable economy!
 
-### 🎰 Lottery System (with VRF)
-- **50% of entry fees** go to lottery pool
-- **Burn tokens** to enter lottery:
-  - 100 tokens = 10% win chance
-  - 500 tokens = 25% win chance
-- **Win 10%** of the lottery pool in SOL
-- **Provably fair**: Uses Switchboard/Orao VRF for verifiable randomness
-- **Burned tokens** are removed from circulation forever
+### 🏆 Daily Leaderboard & Prize System
+- **75% of entry fees** go to daily prize pool
+- **25% of entry fees** go to developer revenue
+- **Top 10 players** split the daily pot at midnight UTC
+- **Prize distribution**:
+  - 🥇 1st Place: 25% of pot
+  - 🥈 2nd Place: 18% of pot
+  - 🥉 3rd Place: 13% of pot
+  - 4th-10th: Decreasing percentages (10%, 8%, 7%, 6%, 5%, 4%, 4%)
+- **Only best daily score counts** - Play multiple times to improve your rank
+- **NFT Trophies** - Top 3 players receive exclusive trophy NFTs
+- **Automatic distribution** - Prizes distributed at midnight UTC
+- **Skill-based competition** - No gambling, pure skill
+
+### 🎁 New Features
+- **📊 Historical Stats Dashboard** - View past leaderboards and your all-time performance
+- **🐦 Social Sharing** - Share your rank on Twitter, Discord, or copy to clipboard
+- **🏅 NFT Trophy System** - Top 3 players receive exclusive daily trophy NFTs
+- **📈 Player Stats Tracking** - Track your days played, total games, best score, and top 10 finishes
+- **⏰ Real-time Countdown** - Live timer showing when leaderboard resets
+- **💰 Transparent Revenue** - Developer revenue tracked on-chain and withdrawable anytime
 
 ### 🔒 Security Features
 - ✅ **Rate limiting** (10 games/hour, 60s cooldown)
 - ✅ **On-chain rate limiting** in Solana program
-- ✅ **Chainlink VRF integration** for provably fair lottery
+- ✅ **On-chain leaderboard** for transparency
 - ✅ **Multisig treasury** support
 - ✅ **Capped token supply** (mint authority removed)
 - ✅ **Smart contract audit ready** (see AUDIT_CHECKLIST.md)
 - ✅ **Token recycling** for sustainable economy
+- ✅ **Automated prize distribution** at midnight UTC
 
 ### 📈 Tokenomics Model
 
@@ -53,12 +65,12 @@ Supply: 10,000,000 $PEW (CAPPED - mint authority removed)
 Distribution:
 ├── Treasury Reserve: 9,900,000 (99%) - For player rewards
 ├── Initial Liquidity: 100,000 (1%) - SOL-PEW pool on Raydium
-└── Circulating: Grows as players earn, shrinks as players burn
+└── Circulating: Grows as players earn
 
 Token Flow:
 Entry Fee (0.01 SOL)
-    ├── 50% → Treasury (operations)
-    └── 50% → Lottery Pool
+    ├── 75% (0.0075 SOL) → Daily Prize Pool (for top 10 players)
+    └── 25% (0.0025 SOL) → Dev Revenue (withdrawable anytime)
 
 Player Earns Tokens:
     Treasury → Player (based on score, max 1,000/game)
@@ -66,14 +78,16 @@ Player Earns Tokens:
 Weapon Upgrades:
     Player → Treasury (tokens RECYCLED for redistribution) ♻️
 
-Lottery Entry:
-    Player Tokens → BURNED 🔥 (deflationary + chance to win SOL)
+Prize Distribution (Midnight UTC):
+    Daily Prize Pool → Top 10 Players (based on rank percentages)
 ```
 
-**Deflation vs. Recycling:**
-- Lottery burns = Permanent supply reduction
-- Upgrade costs = Temporary removal, then redistributed
-- Net effect = Controlled deflation with sustainable rewards
+**Developer Revenue:**
+- You earn **25% of every entry fee** automatically
+- Tracked on-chain in `game_state.dev_revenue`
+- Withdraw anytime using `withdraw_dev_revenue` function
+- At 1,000 games/day = **2.5 SOL/day** = **~$250/day** (at $100/SOL)
+- See `DEV_REVENUE_GUIDE.md` for detailed projections
 
 ## 🚀 Quick Start
 
@@ -257,9 +271,12 @@ Before mainnet deployment:
    - Survive 60 seconds
    - Shoot enemies for points
 4. **Earn Tokens** - Score points to earn $PEW (max 1,000/game)
-5. **Upgrade or Burn**:
-   - **Upgrade weapons** → Tokens recycled to treasury ♻️
-   - **Enter lottery** → Tokens burned for SOL prize chance 🔥
+5. **Compete for Prizes**:
+   - Your best daily score counts toward leaderboard
+   - Reach top 10 to win SOL prizes at midnight UTC
+   - Top 3 receive exclusive NFT trophies
+6. **Upgrade Weapons** - Use $PEW tokens to upgrade (tokens recycled) ♻️
+7. **Share Your Rank** - Show off your achievements on social media 🐦
 
 ### Rate Limits (Anti-Abuse)
 - **10 games per hour** maximum
@@ -351,23 +368,29 @@ With initial liquidity of **10 SOL + 100,000 $PEW**:
 ### Smart Contract Functions
 
 ```rust
-// Initialize game state
-initialize(max_tokens_per_game: u64)
+// Initialize game state with dev wallet
+initialize(entry_fee: u64, max_tokens_per_game: u64)
 
-// Pay entry fee (with rate limiting)
+// Pay entry fee (75% to pot, 25% to dev)
 pay_entry_fee()
 
-// Reward player tokens based on score
-reward_player(score: u64)
+// Submit score to on-chain leaderboard
+submit_score(score: u64)
 
-// Enter lottery by burning tokens
-burn_for_lottery(amount: u64)
+// Distribute daily prizes to top 10
+distribute_daily_prizes()
+
+// Winners claim their prizes
+claim_prize()
+
+// Mint NFT trophy for top 3
+mint_trophy_nft(rank: u8, day: i64)
+
+// Developer withdraws accumulated revenue
+withdraw_dev_revenue(amount: u64)
 
 // Upgrade weapon (recycles tokens to treasury)
 upgrade_weapon(level: u8, cost: u64)
-
-// Request VRF for provably fair lottery
-request_vrf_randomness()
 ```
 
 See `programs/bobo-game/src/lib.rs` for full implementation.
@@ -378,17 +401,25 @@ See `programs/bobo-game/src/lib.rs` for full implementation.
 pew-shooter-solana/
 ├── src/
 │   ├── game/BoboShooterGame.js       # Phaser game engine
-│   ├── components/GameContainer.jsx  # React UI + wallet + rate limiting
+│   ├── components/
+│   │   ├── GameContainer.jsx         # React UI + wallet + rate limiting
+│   │   ├── Leaderboard.jsx           # Daily leaderboard display
+│   │   ├── HistoricalStats.jsx       # Historical leaderboard & player stats
+│   │   └── SocialShare.jsx           # Social media sharing
+│   ├── utils/
+│   │   └── leaderboard.js            # Leaderboard utilities
 │   ├── config/gameConfig.js          # Game & token configuration
 │   ├── App.jsx                       # Main React app
 │   └── main.jsx                      # Entry point
 ├── programs/
-│   └── bobo-game/src/lib.rs          # Solana smart contract
+│   └── bobo-game/src/lib.rs          # Solana smart contract (on-chain leaderboard)
 ├── scripts/
 │   ├── deployToken.js                # Deploy $PEW token
 │   └── initLiquidityPool.js          # Liquidity pool guide
 ├── SECURITY.md                       # Security best practices
 ├── AUDIT_CHECKLIST.md                # Audit preparation
+├── DAILY_LEADERBOARD.md              # Leaderboard system documentation
+├── DEV_REVENUE_GUIDE.md              # Developer revenue guide
 ├── DEPLOYMENT_CHECKLIST.md           # Deployment steps
 └── README.md                         # This file
 ```
@@ -419,33 +450,43 @@ pew-shooter-solana/
 
 ## 🎯 Roadmap
 
-### Phase 1: Launch (Current)
+### Phase 1: Core Features ✅ (Completed)
 - [x] Core game mechanics
-- [x] Token deployment
-- [x] Rate limiting
+- [x] Token deployment with capped supply
+- [x] Rate limiting (10 games/hour, 60s cooldown)
 - [x] Token recycling for upgrades
-- [x] Basic lottery system
+- [x] Daily leaderboard system
+- [x] On-chain leaderboard storage
+- [x] Automated prize distribution
+- [x] NFT trophy system for top 3
+- [x] Historical stats dashboard
+- [x] Social media sharing
+- [x] Developer revenue tracking
 - [x] Security documentation
 
 ### Phase 2: Security (Before Mainnet)
 - [ ] Professional security audit
-- [ ] VRF integration (Switchboard/Orao)
-- [ ] Multisig treasury setup
+- [ ] Multisig treasury setup (Squads Protocol)
 - [ ] Bug bounty program
 - [ ] Incident response plan
+- [ ] Emergency pause mechanism
 
 ### Phase 3: Enhancement
-- [ ] NFT weapons (unique upgrades)
-- [ ] Leaderboards & tournaments
-- [ ] Mobile version
+- [ ] NFT weapon skins (cosmetic upgrades)
+- [ ] Weekly & monthly tournaments
+- [ ] Mobile version (React Native)
 - [ ] Additional game modes
+- [ ] Achievement system with badges
+- [ ] Player profiles & statistics
 - [ ] Governance (DAO for game parameters)
 
 ### Phase 4: Expansion
 - [ ] Multiplayer mode
-- [ ] Seasonal events
+- [ ] Seasonal events with special prizes
 - [ ] Cross-game token utility
 - [ ] Partnerships with other Solana games
+- [ ] Staking $PEW for passive rewards
+- [ ] Community-created levels
 
 ## 🤝 Contributing
 
@@ -462,22 +503,23 @@ Contributions welcome! Areas for improvement:
 
 ### Security
 - **Audit required before mainnet** - Current code is for educational purposes
-- **VRF must be integrated** - Current lottery randomness is NOT secure
 - **Test thoroughly on devnet** before mainnet deployment
 - **Use multisig for treasury** - Single key is high risk
+- **Monitor for exploits** - Set up alerts and monitoring
 
 ### Legal
-- Check local gambling laws before launch
+- Check local gaming/competition laws before launch
 - Token may be considered a security in some jurisdictions
 - Consult legal counsel for compliance
 - Implement KYC if required by your jurisdiction
+- Prize distributions may have tax implications
 
 ### Financial
 - This is experimental software
 - Players can lose their entry fees
 - Token value can go to zero
 - No guarantees of profits
-- Lottery is gambling - players should understand risks
+- Competition-based prizes involve skill but also variance
 
 ## 📄 License
 
@@ -487,7 +529,11 @@ See LICENSE file for details.
 
 ## 📞 Support
 
-- **Documentation**: Read SECURITY.md, AUDIT_CHECKLIST.md
+- **Documentation**:
+  - `SECURITY.md` - Security best practices
+  - `AUDIT_CHECKLIST.md` - Audit preparation
+  - `DAILY_LEADERBOARD.md` - Leaderboard system details
+  - `DEV_REVENUE_GUIDE.md` - Developer revenue projections
 - **Issues**: Open issue on GitHub
 - **Discord**: [Your Discord Server]
 - **Twitter**: [@YourGameTwitter]
@@ -522,7 +568,14 @@ Built with:
 
 **Built with ❤️ on Solana**
 
-**Play. Earn. Upgrade. Win!** 🎯💰🔥
+**Play. Compete. Earn. Win!** 🎯🏆💰
 
-**Version:** 2.0.0 (PEW Edition)
-**Last Updated:** 2026-01-16
+**Version:** 3.0.0 (Leaderboard Edition)
+**Last Updated:** 2026-01-17
+
+**New in 3.0:**
+- Daily leaderboard with automatic prize distribution
+- NFT trophies for top 3 players
+- Historical stats dashboard
+- Social media sharing
+- Transparent developer revenue tracking

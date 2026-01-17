@@ -1,7 +1,7 @@
 {
   "name": "pew-shooter-solana",
-  "version": "2.0.0",
-  "description": "PEW Shooter - Solana play-to-earn game with $PEW token rewards, weapon upgrades, and lottery system",
+  "version": "3.0.0",
+  "description": "PEW Shooter - Solana play-to-earn game with daily leaderboards, NFT trophies, token rewards, and transparent developer revenue",
   "type": "module",
   "main": "src/index.js",
   "scripts": {
