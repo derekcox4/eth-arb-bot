@@ -10,7 +10,6 @@ export const GameConfig = {
   entryFeeLamports: 0.01 * LAMPORTS_PER_SOL,
   maxTokensPerGame: 1000, // Maximum tokens you can earn per game
   maxSupply: 10000000, // 10 million total token supply
-  minBurnForLottery: 50, // Minimum tokens to burn for lottery entry
 
   // Upgrade costs (in tokens) - these get recycled back to treasury
   upgradeCosts: {
@@ -25,13 +24,28 @@ export const GameConfig = {
   rateLimitWindow: 3600000, // 1 hour in milliseconds
   minTimeBetweenGames: 60000, // 1 minute cooldown between games
 
+  // Daily Leaderboard & Prize Distribution
+  dailyResetTime: '00:00', // UTC midnight
+  leaderboardSize: 10, // Top 10 players
+  prizeDistribution: {
+    // Percentage of daily pot for each position
+    1: 25,   // 1st place: 25%
+    2: 18,   // 2nd place: 18%
+    3: 13,   // 3rd place: 13%
+    4: 10,   // 4th place: 10%
+    5: 8,    // 5th place: 8%
+    6: 7,    // 6th place: 7%
+    7: 6,    // 7th place: 6%
+    8: 5,    // 8th place: 5%
+    9: 4,    // 9th place: 4%
+    10: 4    // 10th place: 4%
+    // Total: 100%
+  },
+  potAllocationFromEntry: 0.75, // 75% of entry fee goes to daily pot, 25% to treasury
+
   // Placeholder addresses (replace with real ones after deployment)
   tokenMint: 'TokenMintAddressWillBeGeneratedOnDeployment111111',
   treasuryWallet: 'TreasuryWalletAddressWillBeGeneratedOnDeploy111',
-
-  // Chainlink VRF (for provably fair lottery)
-  vrfCoordinator: 'VRFCoordinatorAddressWillBeSet11111111111111',
-  vrfSubscriptionId: 0, // Set after VRF subscription created
 
   // Game settings
   gameWidth: 800,

@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { PublicKey, LAMPORTS_PER_SOL, Transaction, SystemProgram } from '@solana/web3.js';
-import { getAssociatedTokenAddress, createAssociatedTokenAccountInstruction, getAccount } from '@solana/spl-token';
+import { getAssociatedTokenAddress, getAccount } from '@solana/spl-token';
 import BoboShooterGame from '../game/BoboShooterGame';
+import Leaderboard from './Leaderboard';
 import { GameConfig } from '../config/gameConfig';
+import { updateLeaderboard, getPlayerRank } from '../utils/leaderboard';
 
 const GameContainer = () => {
   const { connection } = useConnection();
@@ -15,10 +17,11 @@ const GameContainer = () => {
   const [score, setScore] = useState(0);
   const [tokenBalance, setTokenBalance] = useState(0);
   const [solBalance, setSolBalance] = useState(0);
-  const [lotteryPool, setLotteryPool] = useState(0);
+  const [dailyPot, setDailyPot] = useState(0);
   const [weaponLevel, setWeaponLevel] = useState(1);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [gamesPlayedThisHour, setGamesPlayedThisHour] = useState(0);
+  const [playerRank, setPlayerRank] = useState(null);
   const gameContainerRef = useRef(null);
 
   // Token mint address (will be set after deployment)
@@ -82,6 +85,7 @@ const GameContainer = () => {
       const status = getRateLimitStatus();
       setCooldownRemaining(status.cooldown);
       setGamesPlayedThisHour(status.gamesPlayed);
+      setPlayerRank(getPlayerRank(publicKey.toString()));
     };
 
     updateCooldown();
@@ -104,22 +108,21 @@ const GameContainer = () => {
         try {
           const tokenAccount = await getAssociatedTokenAddress(TOKEN_MINT, publicKey);
           const accountInfo = await getAccount(connection, tokenAccount);
-          setTokenBalance(Number(accountInfo.amount) / 1e9); // Assuming 9 decimals
+          setTokenBalance(Number(accountInfo.amount) / 1e9);
         } catch (err) {
-          // Token account doesn't exist yet
           setTokenBalance(0);
         }
 
-        // Fetch lottery pool
+        // Fetch daily pot (75% of treasury balance, since 75% of fees go to pot)
         const treasuryBalance = await connection.getBalance(TREASURY_WALLET);
-        setLotteryPool((treasuryBalance / LAMPORTS_PER_SOL) * 0.5); // 50% goes to lottery
+        setDailyPot((treasuryBalance / LAMPORTS_PER_SOL) * GameConfig.potAllocationFromEntry);
       } catch (error) {
         console.error('Error fetching balances:', error);
       }
     };
 
     fetchBalances();
-    const interval = setInterval(fetchBalances, 10000); // Update every 10 seconds
+    const interval = setInterval(fetchBalances, 10000);
 
     return () => clearInterval(interval);
   }, [publicKey, connection]);
@@ -195,11 +198,27 @@ const GameContainer = () => {
     // Calculate token reward based on score (capped)
     const tokensEarned = Math.min(finalScore, GameConfig.maxTokensPerGame);
 
-    console.log(`Game ended! Score: ${finalScore}, Tokens earned: ${tokensEarned}`);
-    alert(`Game Over! You earned ${tokensEarned} ${GameConfig.tokenSymbol} tokens!`);
+    // Update leaderboard
+    updateLeaderboard(publicKey.toString(), finalScore, tokensEarned);
 
-    // In a real implementation, you'd call a Solana program to mint tokens
-    // For now, we'll simulate it
+    // Get updated rank
+    const newRank = getPlayerRank(publicKey.toString());
+    setPlayerRank(newRank);
+
+    // Show result
+    let message = `Game Over! You scored ${finalScore} points and earned ${tokensEarned} ${GameConfig.tokenSymbol} tokens!\n\n`;
+
+    if (newRank && newRank <= GameConfig.leaderboardSize) {
+      message += `🏆 You're ranked #${newRank} on the daily leaderboard!\n`;
+      message += `Keep playing to secure your spot in the top 10!`;
+    } else if (newRank) {
+      message += `Current rank: #${newRank}\n`;
+      message += `You need to reach top 10 to win daily prizes!`;
+    }
+
+    alert(message);
+
+    // In a real implementation, you'd call a Solana program to distribute tokens
     setTokenBalance(prev => prev + tokensEarned);
   };
 
@@ -212,41 +231,9 @@ const GameContainer = () => {
     }
 
     // In real implementation, transfer tokens back to treasury via Solana program
-    // Tokens are recycled, not burned!
     setTokenBalance(prev => prev - cost);
     setWeaponLevel(level);
     alert(`Weapon upgraded to Level ${level}!\n\n${cost} ${GameConfig.tokenSymbol} tokens returned to treasury for redistribution.`);
-  };
-
-  const handleBurnForLottery = async (amount) => {
-    if (tokenBalance < amount) {
-      alert('Insufficient tokens!');
-      return;
-    }
-
-    if (amount < GameConfig.minBurnForLottery) {
-      alert(`Minimum burn amount is ${GameConfig.minBurnForLottery} tokens`);
-      return;
-    }
-
-    try {
-      // In real implementation, call Solana program with Chainlink VRF for provably fair lottery
-      // For demo, simulate lottery (will be replaced with VRF)
-      const won = Math.random() < 0.1;
-
-      setTokenBalance(prev => prev - amount);
-
-      if (won) {
-        const prize = lotteryPool * 0.1; // Win 10% of pool
-        alert(`🎉 Congratulations! You won ${prize.toFixed(4)} SOL!\n\nIn production, this uses Chainlink VRF for provably fair randomness.`);
-        setLotteryPool(prev => prev * 0.9);
-      } else {
-        alert('Better luck next time! Your tokens were burned.\n\n(Production version uses Chainlink VRF for verifiable randomness)');
-      }
-    } catch (error) {
-      console.error('Error burning for lottery:', error);
-      alert('Failed to enter lottery. Please try again.');
-    }
   };
 
   const rateLimitStatus = getRateLimitStatus();
@@ -255,7 +242,7 @@ const GameContainer = () => {
     <div className="game-container">
       <div className="game-header">
         <h1>🎯 {GameConfig.tokenName} SHOOTER</h1>
-        <p>Shoot enemies, earn {GameConfig.tokenSymbol} tokens, win SOL prizes!</p>
+        <p>Compete daily, earn {GameConfig.tokenSymbol} tokens, win SOL prizes!</p>
       </div>
 
       <div className="wallet-section">
@@ -316,8 +303,8 @@ const GameContainer = () => {
               <p>Level {weaponLevel}</p>
             </div>
             <div className="stat-card">
-              <h3>Max Tokens/Game</h3>
-              <p>{GameConfig.maxTokensPerGame}</p>
+              <h3>Your Rank</h3>
+              <p>{playerRank ? `#${playerRank}` : 'Unranked'}</p>
             </div>
           </div>
 
@@ -351,43 +338,18 @@ const GameContainer = () => {
             </div>
           </div>
 
-          <div className="lottery-pool">
-            <h3>🎰 LOTTERY POOL</h3>
-            <div className="prize">{lotteryPool.toFixed(4)} SOL</div>
-            <p style={{ marginTop: '10px', fontSize: '0.9em' }}>
-              Burn tokens for a chance to win!
-            </p>
-            <p style={{ marginTop: '5px', fontSize: '0.8em', opacity: 0.7 }}>
-              Production uses Chainlink VRF for provably fair lottery
-            </p>
-            <div style={{ marginTop: '15px' }}>
-              <button
-                className="lottery-btn"
-                onClick={() => handleBurnForLottery(100)}
-                disabled={tokenBalance < 100}
-              >
-                Burn 100 {GameConfig.tokenSymbol} (10% chance)
-              </button>
-              <button
-                className="lottery-btn"
-                onClick={() => handleBurnForLottery(500)}
-                disabled={tokenBalance < 500}
-                style={{ marginLeft: '10px' }}
-              >
-                Burn 500 {GameConfig.tokenSymbol} (25% chance)
-              </button>
-            </div>
-          </div>
+          {/* Daily Leaderboard */}
+          <Leaderboard dailyPot={dailyPot} />
 
           <div className="game-info">
             <strong>How to Play:</strong>
             <ul style={{ marginTop: '10px', paddingLeft: '20px' }}>
               <li>Pay {GameConfig.entryFee} SOL entry fee to start playing</li>
               <li>Shoot enemies to earn points - each point = 1 {GameConfig.tokenSymbol} token (max {GameConfig.maxTokensPerGame} per game)</li>
-              <li>Use tokens to upgrade your weapon (tokens are recycled, not burned!)</li>
-              <li>Or burn tokens to enter the lottery for SOL prizes</li>
+              <li>Only your best daily score counts for the leaderboard</li>
+              <li>Top 10 players split {(GameConfig.potAllocationFromEntry * 100).toFixed(0)}% of daily entry fees at midnight UTC</li>
+              <li>Use tokens to upgrade your weapon (tokens are recycled!)</li>
               <li>Rate limit: {GameConfig.maxGamesPerHour} games per hour with {GameConfig.minTimeBetweenGames / 1000}s cooldown</li>
-              <li>Token supply is capped at {GameConfig.maxSupply.toLocaleString()} {GameConfig.tokenSymbol}</li>
             </ul>
           </div>
         </>
