@@ -1,0 +1,25 @@
+{
+  "name": "nexuschain",
+  "version": "1.0.0",
+  "description": "AI-Optimized Blockchain with HotStuff Consensus and Block-STM Parallel Execution",
+  "type": "module",
+  "main": "blockchain.js",
+  "scripts": {
+    "demo": "node demo.js",
+    "start": "node demo.js"
+  },
+  "keywords": [
+    "blockchain",
+    "ai",
+    "consensus",
+    "hotstuff",
+    "block-stm",
+    "parallel-execution",
+    "proof-of-stake"
+  ],
+  "author": "AI Agents Collaboration",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
