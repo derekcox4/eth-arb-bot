@@ -1,15 +1,25 @@
-
 {
-  "name": "eth-arb-bot",
-  "version": "2.0.0",
+  "name": "kalshi-bitcoin-bot",
+  "version": "1.0.0",
+  "description": "Kalshi Bitcoin prediction bot with technical analysis",
   "type": "module",
-  "main": "scripts/realTimeRunner.js",
+  "main": "scripts/kalshiBitcoinBot.js",
   "scripts": {
-    "start": "node scripts/realTimeRunner.js"
+    "start": "node scripts/kalshiBitcoinBot.js",
+    "bot": "node scripts/kalshiBitcoinBot.js",
+    "old-runner": "node scripts/realTimeRunner.js"
   },
   "dependencies": {
-    "dotenv": "^16.0.3",
-    "ethers": "^6.7.1",
-    "@flashbots/ethers-provider-bundle": "^1.0.0"
-  }
+    "dotenv": "^16.0.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "kalshi",
+    "bitcoin",
+    "trading",
+    "prediction",
+    "technical-analysis"
+  ]
 }
